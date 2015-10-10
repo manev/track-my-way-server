@@ -4,15 +4,18 @@ function initializeWebSocket() {
 	var socket = require('socket.io');
 	var express = require('express');
 
-	var app = express();
+	var app = express();	
 	var server = http.createServer(app);
-	var io = socket(server);
-	io.on('connection', function (socket) {
+	var io = require('socket.io').listen(server);
+
+	io.sockets.on('connection', function (socket) {
 	    socket.on('event', function (data) {
+	    	io.emit('this', "polu4ih: " + data);
 	        console.log(data);
 	    });
 	});
-	//server.listen(8000);	
+
+	return server;
 };
 
 module.exports = initializeWebSocket;
