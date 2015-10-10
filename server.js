@@ -1,7 +1,6 @@
-var socket = require('./src/socket');
+var socket = require('./src_/socket');
 socket();
 
-var main = require('./src/main'); 
+var main = require('./src_/main'); 
 main.initialize();
 main.start();
-
