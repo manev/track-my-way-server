@@ -12,7 +12,7 @@ function initializeWebSocket() {
 	        console.log(data);
 	    });
 	});
-	//server.listen(3001);	
+	server.listen(8000);	
 };
 
 module.exports = initializeWebSocket;
