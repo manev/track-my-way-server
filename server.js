@@ -1,25 +1,10 @@
-#!/bin/env node
-//  OpenShift sample Node application
 var express = require('express');
 var fs      = require('fs');
 
-
-/**
- *  Define the sample application.
- */
 var SampleApp = function() {
 
-    //  Scope.
     var self = this;
 
-
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
-
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
     self.setupVariables = function() {
         //  Set the environment variables we need.
         self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
@@ -84,14 +69,6 @@ var SampleApp = function() {
         });
     };
 
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
     self.createRoutes = function() {
         self.routes = { };
 
@@ -146,13 +123,8 @@ var SampleApp = function() {
         });
     };
 
-};   /*  Sample Application.  */
+};  
 
-
-
-/**
- *  main():  Main code.
- */
 var zapp = new SampleApp();
 zapp.initialize();
 zapp.start();
