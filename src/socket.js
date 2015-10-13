@@ -10,11 +10,10 @@ function initializeWebSocket() {
 
 	io.sockets.on('connection', function (socket) {
 	    socket.on('event', function (data) {
-	    	io.emit('this', "polu4ih: " + data);
+	    	io.emit('this', data);
 	        console.log(data);
 	    });
 	});
-
 	return server;
 };
 
