@@ -9,9 +9,13 @@ function initializeWebSocket() {
 	var io = require('socket.io').listen(server);
 
 	io.sockets.on('connection', function (socket) {
-	    socket.on('event', function (data) {
-	    	io.emit('this', data);
-	        console.log(data);
+
+		socket.on('android', function (data) {
+	    	io.emit('send-wp', data);
+	    });
+
+	    socket.on('wp', function (data) {
+	    	io.emit('send-android', data);
 	    });
 	});
 	return server;
