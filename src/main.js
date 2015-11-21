@@ -19,11 +19,15 @@ var SampleApp = function() {
     
     self.populateCache = function() { 
         if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
+            self.zcache = { 
+                'index.html': '',
+                'test.html': '',
+             };
         }
 
         //  Local cache for static content.
         self.zcache['index.html'] = fs.readFileSync('./index.html');
+        self.zcache['test.html'] = fs.readFileSync('./test.html');
     };
 
     self.cache_get = function(key) { return self.zcache[key]; };
@@ -61,6 +65,11 @@ var SampleApp = function() {
             res.setHeader('Content-Type', 'text/html');
             res.send(self.cache_get('index.html') );
         };
+
+        self.routes['/test'] = function(req, res) {
+            res.setHeader('Content-Type', 'text/html');
+            res.send(self.cache_get('test.html') );
+        };
     };
 
     self.initializeServer = function() {
@@ -86,8 +95,12 @@ var SampleApp = function() {
         var server = socket();
 
         server.listen(self.port, self.ipaddress, function(){
-            console.log('Express server listening on port ' + self.port);
+            console.log('Socket.IO listening on port  ' + self.port);
         });
+
+        // self.app.listen(3000, function(){
+        //     console.log('Express server listening on port 3000');
+        // });
 
         // Start the app on the specific interface (and port).
         // self.app.listen(self.port, self.ipaddress, function() {
