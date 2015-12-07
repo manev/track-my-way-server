@@ -87,7 +87,7 @@ var SampleApp = function() {
         var socket = require('./socket');
         var server = socket();
 
-        server.listen(self.port, self.ipaddress, function(){
+        server.listen(self.port, self.ipaddress, function() {
             console.log('Socket.IO listening on port  ' + self.port);
         });
 
