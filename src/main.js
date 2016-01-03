@@ -1,7 +1,7 @@
 var express = require('express');
 var fs      = require('fs');
 
-var SampleApp = function() {
+var app = function() {
     var self = this;
 
     self.setupVariables = function() {
@@ -103,4 +103,4 @@ var SampleApp = function() {
     };
 }; 
 
-module.exports = new SampleApp();
+module.exports = new app();

@@ -20,6 +20,13 @@ function initializeWebSocket() {
 	    socket.on('wp', function (data) {
 	    	io.emit('send-android', data);
 	    });
+
+	    if(socket.handshake.query.number){
+	    	socket.on(socket.handshake.query.number, function(userSender){
+	    		io.emit("request-track-result", userSender);
+	    	});
+	    }
+
 	    socket.on('loggin-user-event', function(data){
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
@@ -39,6 +46,7 @@ function initializeWebSocket() {
 				}
 	    	});
 	    });
+
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
