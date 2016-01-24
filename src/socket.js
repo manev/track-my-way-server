@@ -84,6 +84,8 @@ function initializeWebSocket() {
 	    });
 
 	    socket.on('add-user-event', function(data){	
+	    	io.emit('test', url);
+
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
 					console.log(err);
