@@ -86,7 +86,7 @@ function initializeWebSocket() {
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
-	    			io.emit('test', "error connecting to mongo");
+	    			io.emit('test', "error connecting to mongo!");
 					console.log(err);
 				} else {
 		    		db.collection('openshift').insertOne(JSON.parse(data), function(err, result){
