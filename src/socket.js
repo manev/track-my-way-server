@@ -87,7 +87,8 @@ function initializeWebSocket() {
 	    	io.emit('test', url);
 
 	    	MongoClient.connect(url, function(err, db) {
-	    		io.emit('test', "connected to mongo: err is null:" + err === null || err === undefined);
+	    		io.emit('test', "connected to mongo: err is null:");
+	    		io.emit('test', JSON.stringify(err));
 
 	    		if(err) {
 	    			io.emit('test', "error connecting to mongo: " + JSON.stringify(err));
