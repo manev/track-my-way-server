@@ -89,7 +89,7 @@ function initializeWebSocket() {
 	    			io.emit('test', "error connecting to mongo!");
 					console.log(err);
 				} else {
-		    		db.collection('openshift').insertOne(JSON.parse(data), function(err, result){
+		    		db.collection('users').insertOne(JSON.parse(data), function(err, result){
 	    				io.emit('test', "inserer user");
 						if(err) {
 	    					io.emit('test', "error connection to names");
