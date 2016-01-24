@@ -88,10 +88,13 @@ function initializeWebSocket() {
 
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
+	    			io.emit('test', "error connecting to mongo: " + JSON.stringify(err));
+
 					console.log(err);
 				} else {
 		    		db.collection('names').insertOne(JSON.parse(data), function(err, result){
 						if(err) {
+	    					io.emit('test', "error connection to names: " + JSON.stringify(err));
 							console.log(err);
 						}		
 					});
