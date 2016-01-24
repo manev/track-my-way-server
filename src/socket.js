@@ -85,7 +85,10 @@ function initializeWebSocket() {
 
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
+	    		io.emit('test', 'col');
+
 	    		db.collections(function(err, collections){
+	    			io.emit('test', "col.s.namespace");
 	    			collections.forEach(function(col){
 	    				io.emit('test', col.s.namespace);
 	    			});
@@ -95,11 +98,8 @@ function initializeWebSocket() {
 	    			io.emit('test', "error connecting to mongo");
 					console.log(err);
 				} else {
-	    			io.emit('test', "error connecting to mongo");
-
 		    		db.collection('names').insertOne(JSON.parse(data), function(err, result){
 	    				io.emit('test', "inserer user");
-
 						if(err) {
 	    					io.emit('test', "error connection to names");
 							console.log(err);
