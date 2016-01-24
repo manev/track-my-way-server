@@ -9,7 +9,7 @@ function initializeWebSocket() {
 	var io = require('socket.io').listen(server);
 	var MongoClient = require('mongodb').MongoClient;
 
-	var url = 'mongodb://localhost:27017/users';
+	var url = 'mongodb://localhost:270173/users';
 	if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
 		url = 'mongodb://' + process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
 					process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
@@ -85,8 +85,11 @@ function initializeWebSocket() {
 
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
+	    		io.emit('test', url);
+
 	    		if(err) {
 	    			io.emit('test', "error connecting to mongo!");
+	    			io.emit('test', JSON.stringify(err));
 					console.log(err);
 				} else {
 		    		db.collection('users').insertOne(JSON.parse(data), function(err, result){
