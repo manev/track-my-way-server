@@ -87,21 +87,14 @@ function initializeWebSocket() {
 
 	    	MongoClient.connect(url, function(err, db) {
 	    		if(err) {
-	    			io.emit('test', "ima error");
-	    		} else {
-	    			io.emit('test', "nema error");
-	    		}
-
-	    		if(err) {
-	    			io.emit('test', "error connecting to mongo: " + JSON.stringify(err));
-
+	    			io.emit('test', "error connecting to mongo");
 					console.log(err);
 				} else {
 		    		db.collection('names').insertOne(JSON.parse(data), function(err, result){
 	    				io.emit('test', "inserer user");
 
 						if(err) {
-	    					io.emit('test', "error connection to names: " + JSON.stringify(err));
+	    					io.emit('test', "error connection to names");
 							console.log(err);
 						}		
 					});
