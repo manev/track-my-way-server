@@ -86,11 +86,9 @@ function initializeWebSocket() {
 	    socket.on('add-user-event', function(data){	
 
 	    	MongoClient.connect(url, function(err, db) {
-	    		io.emit('test', "connected to mongo: err is null:");
-
-	    		if(err){
+	    		if(err) {
 	    			io.emit('test', "ima error");
-	    		}else {
+	    		} else {
 	    			io.emit('test', "nema error");
 	    		}
 
