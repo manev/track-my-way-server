@@ -84,12 +84,19 @@ function initializeWebSocket() {
 	    });
 
 	    socket.on('add-user-event', function(data){	
-
 	    	MongoClient.connect(url, function(err, db) {
+	    		db.collections(function(err, collections){
+	    			collections.forEach(function(col){
+	    				io.emit('test', col.s.namespace);
+	    			});
+	    		});
+
 	    		if(err) {
 	    			io.emit('test', "error connecting to mongo");
 					console.log(err);
 				} else {
+	    			io.emit('test', "error connecting to mongo");
+
 		    		db.collection('names').insertOne(JSON.parse(data), function(err, result){
 	    				io.emit('test', "inserer user");
 
