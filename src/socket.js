@@ -90,7 +90,7 @@ function initializeWebSocket() {
 				  var adminDb = db.admin();
 				  // List all the available databases
 				  adminDb.listDatabases(function(err, dbs) {
-	    			io.emit('test', dbs.databases.length;
+	    			io.emit('test', dbs.databases.length);
 				    db.close();
 				  });
 
