@@ -87,26 +87,23 @@ function initializeWebSocket() {
 	    	MongoClient.connect(url, function(err, db) {
 	    		io.emit('test', url);
 
-	    		if(err) {
-	    			io.emit('test', "error connecting to mongo!");
-	    			io.emit('test', JSON.stringify(err));
-					console.log(err);
-				} else {
-		    		db.collection('users').insertOne(JSON.parse(data), function(err, result){
-	    				io.emit('test', "inserer user");
-						if(err) {
-	    					io.emit('test', "error connection to names");
-							console.log(err);
-						}		
-					});
-				}
-
-				db.collections(function(err, collections){
-	    			io.emit('test', "col.s.namespace");
-	    			collections.forEach(function(col){
-	    				io.emit('test', col.s.namespace);
-	    			});
+	    		db.collection('openshift').findOne(function(err, res){
+	    			io.emit('test', "All in");
+	    			io.emit('test', JSON.stringify(res));
 	    		});
+
+	   //  		if(err) {
+	   //  			io.emit('test', "error connecting to mongo!");
+				// 	console.log(err);
+				// } else {
+		  //   		db.collection('users').insertOne(JSON.parse(data), function(err, result){
+	   //  				io.emit('test', "inserer user");
+				// 		if(err) {
+	   //  					io.emit('test', "error connection to names");
+				// 			console.log(err);
+				// 		}		
+				// 	});
+				// }
 			});
 	    });
 	});
