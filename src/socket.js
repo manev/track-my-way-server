@@ -9,13 +9,28 @@ function initializeWebSocket() {
 	var io = require('socket.io').listen(server);
 	var MongoClient = require('mongodb').MongoClient;
 
-	var url = 'mongodb://localhost:270173/users';
+	var user = "admin";
+	var pass = "aC4yFiqqu6zY";
+
+	var url = 'mongodb://localhost:27017/whereru';
 	if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
 		url = 'mongodb://' + process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
 					process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
 				  	process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
 					process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
 					process.env.OPENSHIFT_APP_NAME;
+	}
+
+	function mongoOp(func){
+		MongoClient.connect(url, function(err, db) {
+			if(err) {
+				console.log("error: " + func.toString());	
+			} else {
+				db.authenticate(user, pass, function(args){
+					func(db);
+    			});	
+			}
+    	});
 	}
 
 	io.sockets.on('connection', function (socket) {
@@ -64,55 +79,31 @@ function initializeWebSocket() {
 
 	    	socket.user = user;
 
-	    	MongoClient.connect(url, function(err, db) {
-	    		if(err) {
-					console.log(err);
-				} else {
-		    		var cursor = db.collection('names').find();
-		    		var results = [];
-		    		cursor.each(function(err, doc){
-		    			if(err) {
-		    				console.log(err);
-		    			} else if(doc != null) {
-		    				results.push(doc);
-		    			} else {
-					    	io.emit('get-all-registered-users-event', JSON.stringify(results));		
-		    			}
-		    		});
-				}
+	    	mongoOp(function(db){
+	    		var cursor = db.collection('names').find();
+	    		var results = [];
+	    		cursor.each(function(err, doc){
+	    			if(err) {
+	    				console.log(err);
+	    			} else if(doc != null) {
+	    				results.push(doc);
+	    			} else {
+				    	io.emit('get-all-registered-users-event', JSON.stringify(results));		
+	    			}
+	    		});
 	    	});
 	    });
 
 	    socket.on('add-user-event', function(data){	
-	    	MongoClient.connect(url, function(err, db) {
-
-	    			io.emit('test', "mongo contected");
-	    		// Use the admin database for the operation
-				  var adminDb = db.admin();
-				  // List all the available databases
-				  adminDb.listDatabases(function(err, dbs) {
-	    			io.emit('test', dbs.databases.length);
-				    db.close();
-				  });
-
-	    		db.collection('openshift').findOne(function(err, res){
-	    			io.emit('test', "All in");
-	    			io.emit('test', JSON.stringify(res));
-	    		});
-
-	   //  		if(err) {
-	   //  			io.emit('test', "error connecting to mongo!");
-				// 	console.log(err);
-				// } else {
-		  //   		db.collection('users').insertOne(JSON.parse(data), function(err, result){
-	   //  				io.emit('test', "inserer user");
-				// 		if(err) {
-	   //  					io.emit('test', "error connection to names");
-				// 			console.log(err);
-				// 		}		
-				// 	});
-				// }
-			});
+	    	mongoOp(function(db){
+	    		db.collection('users').insertOne(JSON.parse(data), function(err, result){
+    				io.emit('test', "inserer user");
+					if(err) {
+    					io.emit('error', "error connection to names");
+						console.log(err);
+					}		
+				});
+	    	});
 	    });
 	});
 	return server;
