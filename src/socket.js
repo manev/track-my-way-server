@@ -86,6 +86,7 @@ function initializeWebSocket() {
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
 
+	    			io.emit('test', "mongo contected");
 	    		// Use the admin database for the operation
 				  var adminDb = db.admin();
 				  // List all the available databases
