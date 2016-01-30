@@ -102,7 +102,7 @@ function initializeWebSocket() {
     		io.emit('log', "add-user-event");
 	    	mongoOp(function(db){
     			io.emit('log', "before insert into users");
-    			io.emit('log', JSON.stringify(db.collection));
+    			io.emit('log', JSON.stringify(db));
 	    		db.collection('users').insertOne(JSON.parse(data), function(err, result){
     				io.emit('log', "insert user");
 					if(err) {
