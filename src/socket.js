@@ -23,14 +23,11 @@ function initializeWebSocket() {
 
 	function mongoOp(func){
 		MongoClient.connect(url, function(err, db) {
-    		io.emit('log', "mongo connected");
-    		io.emit('log', "err == " + err === null);
-
 			if(err) {
 				console.log("error: " + func.toString());	
+    			io.emit('log', "error connecting mongo");
 			} else {
 				db.authenticate(user, pass, function(args){
-    				io.emit('log', "user authenticated");
 					func(db);
     			});	
 			}
@@ -84,7 +81,7 @@ function initializeWebSocket() {
 	    	socket.user = user;
 
 	    	mongoOp(function(db){
-	    		var cursor = db.collection('names').find();
+	    		var cursor = db.collection('users').find();
 	    		var results = [];
 	    		cursor.each(function(err, doc){
 	    			if(err) {
@@ -99,17 +96,13 @@ function initializeWebSocket() {
 	    });
 
 	    socket.on('add-user-event', function(data){	
-    		io.emit('log', "add-user-event");
 	    	mongoOp(function(db){
-    			io.emit('log', "before insert into users");
 	    		db.collection('users').insert(JSON.parse(data), function(err, result){
-    				io.emit('log', "insert user");
 					if(err) {
     					io.emit('log', "error connection to users");
 						console.log(err);
 					}		
 				});
-    			io.emit('log', "after insert into users");
 	    	});
 	    });
 	});
