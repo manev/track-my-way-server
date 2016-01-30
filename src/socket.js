@@ -85,6 +85,15 @@ function initializeWebSocket() {
 
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
+
+	    		// Use the admin database for the operation
+				  var adminDb = db.admin();
+				  // List all the available databases
+				  adminDb.listDatabases(function(err, dbs) {
+	    			io.emit('test', dbs.databases.length;
+				    db.close();
+				  });
+
 	    		db.collection('openshift').findOne(function(err, res){
 	    			io.emit('test', "All in");
 	    			io.emit('test', JSON.stringify(res));
