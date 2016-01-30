@@ -1,3 +1,4 @@
+// initalize web socket object.
 function initializeWebSocket() {
 
 	var http = require('http');
