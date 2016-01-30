@@ -103,7 +103,7 @@ function initializeWebSocket() {
 	    	mongoOp(function(db){
     			io.emit('log', "before insert into users");
     			try {
-	    			var message = db.collection('users') === null || db.collection('users') === undefined ? "db.collection('users') is null" : "db.collection('users') is OK";
+	    			var message = db.collection('users').insert === null || db.collection('users').insert === undefined ? "db.collection('users').insert is null" : "db.collection('users').insert is OK";
     				io.emit('log', message);
     			}
     			catch(ex){
