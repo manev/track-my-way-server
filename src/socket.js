@@ -85,8 +85,6 @@ function initializeWebSocket() {
 
 	    socket.on('add-user-event', function(data){	
 	    	MongoClient.connect(url, function(err, db) {
-	    		io.emit('test', url);
-
 	    		db.collection('openshift').findOne(function(err, res){
 	    			io.emit('test', "All in");
 	    			io.emit('test', JSON.stringify(res));
