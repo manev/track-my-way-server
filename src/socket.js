@@ -36,14 +36,6 @@ function initializeWebSocket() {
 	}
 
 	io.sockets.on('connection', function (socket) {
-		socket.on('android', function (data) {
-	    	io.emit('send-wp', data);
-	    });
-
-	    socket.on('wp', function (data) {
-	    	io.emit('send-android', data);
-	    });
-
 	    socket.on("request-user-track", function(target){
 			var targetUser = JSON.parse(target);
 
@@ -51,7 +43,7 @@ function initializeWebSocket() {
 	    	socket.join(senderRoom);
 
 	    	var requestUserEvent = targetUser.Phone.Number + "-request-user-event";
-	    	io.in(requestUserEvent).emit(requestUserEvent, JSON.stringify(socket.user));
+	    	io.in(targetUser.Phone.Number).emit(requestUserEvent, JSON.stringify(socket.user));
 	    });
 
 	    socket.on("request-user-track-result", function(target){
@@ -62,7 +54,7 @@ function initializeWebSocket() {
 	    		socket.join(room);
 	    	}
 
-	    	var room = targetUser.SenderUser.Phone.Number + "-request-user-event";
+	    	var room = targetUser.SenderUser.Phone.Number;
 
 	    	targetUser.SenderUser = socket.user;
 	    	io.in(room).emit("request-user-event-result", JSON.stringify(targetUser));
@@ -74,10 +66,14 @@ function initializeWebSocket() {
 	    	io.in(room).emit("send-position-event", position);
 		});
 
+		socket.on("stop-user-tracking", function(target){
+			var targetUser = JSON.parse(target);
+	    	io.in(targetUser.Phone.Number).emit("stop-user-tracking", JSON.stringify(socket.user));
+		});
+
 	    socket.on('loggin-user-event', function(data){
 	    	var user = JSON.parse(data);
-	    	var requestUserEvent = user.Phone.Number + "-request-user-event";
-	    	socket.join(requestUserEvent);
+	    	socket.join(user.Phone.Number);
 
 	    	socket.user = user;
 
