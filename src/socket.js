@@ -35,7 +35,33 @@ function initializeWebSocket() {
     	});
 	}
 
+	function emitUsers(){
+		mongoOp(function(db){
+    		var cursor = db.collection('users').find();
+    		var results = [];
+    		cursor.each(function(err, doc){
+    			if(err) {
+    				console.log(err);
+    			} else if(doc != null) {
+    				if(!doc.IsOnline)
+	    				io.sockets.sockets.forEach(function(s){
+	    					if(s.user && s.user.Phone.Number === doc.Phone.Number)
+	    						doc.IsOnline = true;
+	    				});
+    				results.push(doc);
+    			} else {
+			    	io.emit('get-all-registered-users-event', JSON.stringify(results));		
+    			}
+    		});
+    	});
+	}
+
 	io.sockets.on('connection', function (socket) {
+		socket.on('disconnect', function (e) {
+			if(socket.user)
+	    		io.emit('disonnect-user', JSON.stringify(socket.user));
+		});
+
 	    socket.on("request-user-track", function(target){
 			var targetUser = JSON.parse(target);
 
@@ -76,20 +102,9 @@ function initializeWebSocket() {
 	    	socket.join(user.Phone.Number);
 
 	    	socket.user = user;
+	    	socket.user.IsOnline = true;
 
-	    	mongoOp(function(db){
-	    		var cursor = db.collection('users').find();
-	    		var results = [];
-	    		cursor.each(function(err, doc){
-	    			if(err) {
-	    				console.log(err);
-	    			} else if(doc != null) {
-	    				results.push(doc);
-	    			} else {
-				    	io.emit('get-all-registered-users-event', JSON.stringify(results));		
-	    			}
-	    		});
-	    	});
+	    	emitUsers();
 	    });
 
 	    socket.on('add-user-event', function(data){	
