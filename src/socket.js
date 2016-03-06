@@ -93,7 +93,6 @@ function initializeWebSocket() {
 		});
 
 		socket.on("stop-user-tracking", function(target){
-			var targetUser = JSON.parse(target);
 	    	io.in(targetUser.Phone.Number).emit("stop-user-tracking", JSON.stringify(socket.user));
 		});
 
