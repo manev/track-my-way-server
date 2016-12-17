@@ -6,8 +6,8 @@ var app = function() {
 
     self.setupVariables = function() {
         //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || "192.168.1.147";
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 3001;
+        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || "192.168.1.121";
+        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8081;
 
         if (typeof self.ipaddress === "undefined") {
             //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
@@ -88,7 +88,7 @@ var app = function() {
         var server = socket();
 
         server.listen(self.port, self.ipaddress, function() {
-            console.log('Socket.IO listening on port  ' + self.port);
+            console.log('Socket.IO listening on port  ' + self.port + " address: " + self.ipaddress);
         });
 
         // self.app.listen(3000, function(){

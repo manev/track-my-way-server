@@ -14,7 +14,7 @@ function initializeWebSocket() {
     var user = "admin";
     var pass = "aC4yFiqqu6zY";
 
-    var url = 'mongodb://localhost:27017/whereru';
+    var url = 'mongodb://127.0.0.1:27017/whereru';
     if (process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
         url = 'mongodb://' + process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
             process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
@@ -27,7 +27,7 @@ function initializeWebSocket() {
         MongoClient.connect(url, function (err, db) {
             if (err) {
                 console.log("error: " + func.toString());
-                io.emit('log', "error connecting mongo");
+                io.emit('log', "error connecting mongo. Error: " + err.message + "; stack: " + err.stack);
             } else {
                 db.authenticate(user, pass, function (args) {
                     func(db);
@@ -45,8 +45,9 @@ function initializeWebSocket() {
                     console.log(err);
                 } else if (doc != null) {
                     if (!doc.IsOnline)
-                        io.sockets.sockets.forEach(function (s) {
-                            if (s.user && s.user.Phone.Number === doc.Phone.Number)
+                        Object.keys(io.sockets.sockets).forEach(function (s) {
+                            var socket = io.sockets.sockets[s];
+                            if (socket.user && socket.user.Phone.Number === doc.Phone.Number)
                                 doc.IsOnline = true;
                         });
                     results.push(doc);
@@ -94,6 +95,7 @@ function initializeWebSocket() {
         });
 
         socket.on("stop-user-tracking", function (target) {
+            var targetUser = JSON.parse(target);
             io.in(targetUser.Phone.Number).emit("stop-user-tracking", JSON.stringify(socket.user));
         });
 
@@ -170,7 +172,7 @@ function initializeWebSocket() {
             });
         });
 
-        socket.on('ping', function () {
+        socket.on('ping-me', function () {
             if (socket.user)
                 io.emit('ping-back', JSON.stringify(socket.user));
         });
