@@ -12,7 +12,7 @@ function initializeWebSocket() {
     var gcm = require('node-gcm');
 
     var user = "admin";
-    var pass = "aC4yFiqqu6zY";
+    var pass = "admin";
 
     var userSocketsMap = {};
 
@@ -75,7 +75,7 @@ function initializeWebSocket() {
                 var targetSocket = userSocketsMap[targetUser.Phone.Number];
                 targetSocket.emit("request-user-event", JSON.stringify(socket.user));
             } else {
-                //// emit user is offline 
+                socket.emit("disonnect-user", JSON.stringify(targetUser));
             }
         });
 
@@ -88,7 +88,7 @@ function initializeWebSocket() {
             if (targetSocket) {
                 targetSocket.emit("request-user-event-result", JSON.stringify(targetUser));
             } else {
-                //// emit user is no online.
+                socket.emit("disonnect-user", JSON.stringify(targetUser));
             }
         });
 
@@ -108,7 +108,7 @@ function initializeWebSocket() {
             if (targetSocket) {
                 targetSocket.emit("stop-user-tracking", JSON.stringify(socket.user));
             } else {
-                //// emit user is no online.
+                socket.emit("disonnect-user", JSON.stringify(targetUser));
             }
         });
 
