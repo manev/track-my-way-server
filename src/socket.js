@@ -98,7 +98,7 @@ function initializeWebSocket() {
             if (targetSocket) {
                 targetSocket.emit("send-position-event", position);
             } else {
-                targetSocket.emit("disonnect-user", JSON.stringify(targetUser));
+                socket.emit("disonnect-user", JSON.stringify(targetUser));
             }
         });
 
