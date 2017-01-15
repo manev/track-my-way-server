@@ -71,13 +71,6 @@ function initializeWebSocket() {
 
         socket.on("request-user-track", function (target) {
             var targetUser = JSON.parse(target);
-
-            // var senderRoom = socket.user.Phone.Number + "-send-position-event";
-            // socket.join(senderRoom);
-
-            // var requestUserEvent = targetUser.Phone.Number + "-request-user-event";
-            // io.in(targetUser.Phone.Number).emit(requestUserEvent, JSON.stringify(socket.user));
-
             if (userSocketsMap[targetUser.Phone.Number]) {
                 var targetSocket = userSocketsMap[targetUser.Phone.Number];
                 targetSocket.emit("request-user-event", JSON.stringify(socket.user));
@@ -88,18 +81,10 @@ function initializeWebSocket() {
 
         socket.on("request-user-track-result", function (target) {
             var targetUser = JSON.parse(target);
-
-            // if (targetUser.IsAccepted) {
-            //     var room = socket.user.Phone.Number + "-send-position-event";
-            //     socket.join(room);
-            // }
-
             var room = targetUser.SenderUser.Phone.Number;
+            var targetSocket = userSocketsMap[room];
 
             targetUser.SenderUser = socket.user;
-            // io.in(room).emit("request-user-event-result", JSON.stringify(targetUser));
-
-            var targetSocket = userSocketsMap[room];
             if (targetSocket) {
                 targetSocket.emit("request-user-event-result", JSON.stringify(targetUser));
             } else {
@@ -109,20 +94,16 @@ function initializeWebSocket() {
 
         socket.on("send-position-event", function (target, position) {
             var targetUser = JSON.parse(target);
-            // var room = targetUser.Phone.Number + "-send-position-event";
-            // io.in(room).emit("send-position-event", position);
             var targetSocket = userSocketsMap[targetUser.Phone.Number];
             if (targetSocket) {
                 targetSocket.emit("send-position-event", position);
             } else {
-                //// emit user is no online.
+                targetSocket.emit("disonnect-user", JSON.stringify(targetUser));
             }
         });
 
         socket.on("stop-user-tracking", function (target) {
             var targetUser = JSON.parse(target);
-            //io.in(targetUser.Phone.Number).emit("stop-user-tracking", JSON.stringify(socket.user));
-
             var targetSocket = userSocketsMap[targetUser.Phone.Number];
             if (targetSocket) {
                 targetSocket.emit("stop-user-tracking", JSON.stringify(socket.user));
@@ -133,7 +114,6 @@ function initializeWebSocket() {
 
         socket.on('loggin-user-event', function (data) {
             var user = JSON.parse(data);
-            //socket.join(user.Phone.Number);
 
             socket.user = user;
             socket.user.IsOnline = true;
