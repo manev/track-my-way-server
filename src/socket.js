@@ -12,7 +12,7 @@ function initializeWebSocket() {
     var gcm = require('node-gcm');
 
     var user = "admin";
-    var pass = "admin";
+    var pass = "aC4yFiqqu6zY";
 
     var userSocketsMap = {};
 
