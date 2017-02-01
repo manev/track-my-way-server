@@ -12,7 +12,7 @@ function initializeWebSocket() {
     var gcm = require('node-gcm');
 
     var user = "admin";
-    var pass = "admin";
+    var pass = "aC4yFiqqu6zY";
 
     var userSocketsMap = {};
 
@@ -70,10 +70,16 @@ function initializeWebSocket() {
         });
 
         socket.on("request-user-track", function (target) {
+            socket.user.hasRequestStarted = true;
             var targetUser = JSON.parse(target);
-            if (userSocketsMap[targetUser.Phone.Number]) {
-                var targetSocket = userSocketsMap[targetUser.Phone.Number];
-                targetSocket.emit("request-user-event", JSON.stringify(socket.user));
+            var userSocket = userSocketsMap[targetUser.Phone.Number];
+            if (userSocket) {
+                if (userSocket.user.hasRequestStarted) {
+                    socket.emit("user-has-request-started", JSON.stringify(targetUser));
+                } else {
+                    userSocket.user.hasRequestStarted = true;
+                    userSocket.emit("request-user-event", JSON.stringify(socket.user));
+                }
             } else {
                 socket.emit("disonnect-user", JSON.stringify(targetUser));
             }
@@ -81,11 +87,14 @@ function initializeWebSocket() {
 
         socket.on("request-user-track-result", function (target) {
             var targetUser = JSON.parse(target);
-            var room = targetUser.SenderUser.Phone.Number;
-            var targetSocket = userSocketsMap[room];
+            var targetSocket = userSocketsMap[targetUser.SenderUser.Phone.Number];
 
             targetUser.SenderUser = socket.user;
             if (targetSocket) {
+                if (!targetUser.IsAccepted) {
+                    targetSocket.user.hasRequestStarted = false;
+                    socket.user.hasRequestStarted = false;
+                }
                 targetSocket.emit("request-user-event-result", JSON.stringify(targetUser));
             } else {
                 socket.emit("disonnect-user", JSON.stringify(targetUser));
@@ -105,7 +114,9 @@ function initializeWebSocket() {
         socket.on("stop-user-tracking", function (target) {
             var targetUser = JSON.parse(target);
             var targetSocket = userSocketsMap[targetUser.Phone.Number];
-            if (targetSocket) {
+            if (targetSocket && targetSocket.user && socket.user) {
+                targetSocket.user.hasRequestStarted = false;
+                socket.user.hasRequestStarted = false;
                 targetSocket.emit("stop-user-tracking", JSON.stringify(socket.user));
             } else {
                 socket.emit("disonnect-user", JSON.stringify(targetUser));
@@ -137,7 +148,11 @@ function initializeWebSocket() {
         socket.on('user-registration-key', function (data) {
             var payload = JSON.parse(data);
             mongoOp(function (db) {
-                db.collection('push-registration').update({ phoneNumber: payload.phoneNumber }, payload, { upsert: true }, function (err, result) {
+                db.collection('push-registration').update({
+                    phoneNumber: payload.phoneNumber
+                }, payload, {
+                    upsert: true
+                }, function (err, result) {
                     if (err) {
                         io.emit('log', "error connection to users");
                         console.log(err);
@@ -160,14 +175,18 @@ function initializeWebSocket() {
             var targetUser = JSON.parse(data);
 
             mongoOp(function (db) {
-                var cursor = db.collection('push-registration').find({ phoneNumber: targetUser.Phone.Number });
+                var cursor = db.collection('push-registration').find({
+                    phoneNumber: targetUser.Phone.Number
+                });
 
                 cursor.each(function (err, doc) {
                     if (err) {
                         console.log(err);
                     } else if (doc != null) {
                         var message = new gcm.Message({
-                            data: { key1: 'msg1' }
+                            data: {
+                                key1: 'msg1'
+                            }
                         });
 
                         // Set up the sender with you API key, prepare your recipients' registration tokens.
@@ -175,7 +194,9 @@ function initializeWebSocket() {
 
                         var regTokens = [doc.key];
 
-                        sender.send(message, { registrationTokens: regTokens }, function (err, response) {
+                        sender.send(message, {
+                            registrationTokens: regTokens
+                        }, function (err, response) {
                             if (err)
                                 console.error(err);
                             else
