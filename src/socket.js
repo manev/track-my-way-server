@@ -60,12 +60,23 @@ function initializeWebSocket() {
         });
     }
 
+    function disposeUser(user) {
+        delete userSocketsMap[user.Phone.Number];
+        io.emit('disonnect-user', JSON.stringify(user));
+    }
+
     io.sockets.on('connection', function (socket) {
         socket.on('disconnect', function (e) {
             if (socket.user) {
-                delete userSocketsMap[socket.user.Phone.Number];
-
-                io.emit('disonnect-user', JSON.stringify(socket.user));
+                socket.user.IsOnline = false;
+                if (socket.user.hasRequestStarted) {
+                    setTimeout(function () {
+                        if (!userSocketsMap[socket.user.Phone.Number].user.IsOnline)
+                            disposeUser(socket.user);
+                    }, 15000);
+                } else {
+                    disposeUser(socket.user);
+                }
             }
         });
 
