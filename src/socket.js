@@ -15,6 +15,7 @@ function initializeWebSocket() {
     var pass = "aC4yFiqqu6zY";
 
     var userSocketsMap = {};
+    var currentUserSessions = {};
 
     var url = 'mongodb://127.0.0.1:27017/whereru';
     if (process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
@@ -81,6 +82,10 @@ function initializeWebSocket() {
         });
 
         socket.on("request-user-track", function (target) {
+            if (socket.user.hasRequestStarted) {
+                socket.emit("user-has-request-started", target);
+                return;
+            }
             socket.user.hasRequestStarted = true;
             var targetUser = JSON.parse(target);
             var userSocket = userSocketsMap[targetUser.Phone.Number];
