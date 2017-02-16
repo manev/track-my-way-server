@@ -16,6 +16,7 @@ function initializeWebSocket() {
 
     var userSocketsMap = {};
     var currentUserSessions = {};
+    var currentWebSessions = {};
 
     var url = 'mongodb://127.0.0.1:27017/whereru';
     if (process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
@@ -79,6 +80,13 @@ function initializeWebSocket() {
                     disposeUser(socket.user);
                 }
             }
+            if (socket["tracked-room"]) {
+                const ns = socket["tracked-room"];
+                currentWebSessions[ns] = --currentWebSessions[ns];
+                const num = ns.split('-')[0];
+                if (num && userSocketsMap[num])
+                    userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns]);
+            }
         });
 
         socket.on("request-user-track", function (target) {
@@ -117,13 +125,20 @@ function initializeWebSocket() {
             }
         });
 
-        socket.on("send-position-event", function (target, position) {
-            var targetUser = JSON.parse(target);
-            var targetSocket = userSocketsMap[targetUser.Phone.Number];
-            if (targetSocket) {
-                targetSocket.emit("send-position-event", position);
+        socket.on("send-position-event", function (target, position, ns) {
+            if (ns) {
+                socket.to(ns).emit("send-position-event", JSON.stringify({
+                    target: target,
+                    position: position
+                }));
             } else {
-                socket.emit("disonnect-user", JSON.stringify(targetUser));
+                var targetUser = JSON.parse(target);
+                var targetSocket = userSocketsMap[targetUser.Phone.Number];
+                if (targetSocket) {
+                    targetSocket.emit("send-position-event", position);
+                } else {
+                    socket.emit("disonnect-user", JSON.stringify(targetUser));
+                }
             }
         });
 
@@ -223,9 +238,19 @@ function initializeWebSocket() {
             });
         });
 
-        socket.on('ping-me', function () {
+        socket.on('ping-me', () => {
             if (socket.user)
                 io.emit('ping-back', JSON.stringify(socket.user));
+        });
+
+        socket.on('web-register-listener', ns => {
+            const num = ns.split('-')[0];
+            if (num && userSocketsMap[num]) {
+                socket["tracked-room"] = ns;
+                socket.join(ns);
+                currentWebSessions[ns] = currentWebSessions[ns] ? ++currentWebSessions[ns] : 1;
+                userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns]);
+            }
         });
     });
     return server;
