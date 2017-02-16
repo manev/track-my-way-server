@@ -8,9 +8,9 @@ function initializeWebSocket() {
     var app = express();
     var server = http.createServer(app);
     var io = require('socket.io').listen(server, {
-        log: false,
         origins: '*:*'
     });
+    io.set("origins", "*:*");
     var MongoClient = require('mongodb').MongoClient;
     var gcm = require('node-gcm');
 
