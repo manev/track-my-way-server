@@ -7,7 +7,10 @@ function initializeWebSocket() {
 
     var app = express();
     var server = http.createServer(app);
-    var io = require('socket.io').listen(server);
+    var io = require('socket.io').listen(server, {
+        log: false,
+        origins: '*:*'
+    });
     var MongoClient = require('mongodb').MongoClient;
     var gcm = require('node-gcm');
 
@@ -19,9 +22,9 @@ function initializeWebSocket() {
     var currentWebSessions = {};
 
     var allowCrossDomain = function (req, res, next) {
-        res.header('Access-Control-Allow-Origin', 'http://web-kokata.rhcloud.com');
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
         next();
     }
 
