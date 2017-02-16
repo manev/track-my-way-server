@@ -18,6 +18,15 @@ function initializeWebSocket() {
     var currentUserSessions = {};
     var currentWebSessions = {};
 
+    var allowCrossDomain = function (req, res, next) {
+        res.header('Access-Control-Allow-Origin', 'http://web-kokata.rhcloud.com');
+        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+        next();
+    }
+
+    app.use("/*", allowCrossDomain);
+
     var url = 'mongodb://127.0.0.1:27017/whereru';
     if (process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
         url = 'mongodb://' + process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
