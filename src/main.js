@@ -5,7 +5,7 @@ var app = function() {
     var self = this;
 
     self.setupVariables = function() {
-        //  Set the environment variables we need.
+        //  Set the environment variables we need...
         self.ipaddress = process.env.OPENSHIFT_NODEJS_IP || "192.168.1.100";
         self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8081;
 
