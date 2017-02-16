@@ -250,12 +250,12 @@ function initializeWebSocket() {
             });
         });
 
-        socket.on('ping-me', () => {
+        socket.on('ping-me', function () {
             if (socket.user)
                 io.emit('ping-back', JSON.stringify(socket.user));
         });
 
-        socket.on('web-register-listener', ns => {
+        socket.on('web-register-listener', function (ns) {
             const num = ns.split('-')[0];
             if (num && userSocketsMap[num]) {
                 socket["tracked-room"] = ns;
