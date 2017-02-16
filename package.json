@@ -34,5 +34,8 @@
   "devDependencies": {},
   "bundleDependencies": [],
   "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
   "main": "server.js"
 }
