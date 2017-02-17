@@ -4,6 +4,7 @@ function initializeWebSocket() {
     var http = require('http');
     var socket = require('socket.io');
     var express = require('express');
+    var pushService = require('./push-service');
 
     var app = express();
     var server = http.createServer(app);
@@ -94,10 +95,10 @@ function initializeWebSocket() {
             }
             if (socket["tracked-room"]) {
                 const ns = socket["tracked-room"];
-                currentWebSessions[ns] = --currentWebSessions[ns];
+                currentWebSessions[ns].count = --currentWebSessions[ns].count;
                 const num = ns.split('-')[0];
                 if (num && userSocketsMap[num])
-                    userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns]);
+                    userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns].count);
             }
         });
 
@@ -139,10 +140,16 @@ function initializeWebSocket() {
 
         socket.on("send-position-event", function (target, position, ns) {
             if (ns) {
-                socket.to(ns).emit("send-position-event", JSON.stringify({
-                    target: target,
-                    position: position
-                }));
+                if (currentWebSessions[ns]) {
+                    const args = JSON.stringify({
+                        target: target,
+                        position: position
+                    });
+                    socket.broadcast.in(ns).emit("send-position-event", args);
+                    // currentWebSessions[ns].sockets.forEach(function (s) {
+                    //     s.emit("send-position-event", args);
+                    // });
+                }
             } else {
                 var targetUser = JSON.parse(target);
                 var targetSocket = userSocketsMap[targetUser.Phone.Number];
@@ -155,8 +162,11 @@ function initializeWebSocket() {
         });
 
         socket.on("stop-user-tracking", function (target) {
-            var targetUser = JSON.parse(target);
-            var targetSocket = userSocketsMap[targetUser.Phone.Number];
+            const targetUser = JSON.parse(target);
+            const targetSocket = userSocketsMap[targetUser.Phone.Number];
+            if (targetUser["tracked-room"]) {
+                delete currentWebSessions[targetUser["tracked-room"]];
+            }
             if (targetSocket && targetSocket.user && socket.user) {
                 targetSocket.user.hasRequestStarted = false;
                 socket.user.hasRequestStarted = false;
@@ -166,8 +176,8 @@ function initializeWebSocket() {
             }
         });
 
-        socket.on('loggin-user-event', function (data) {
-            var user = JSON.parse(data);
+        socket.on("loggin-user-event", function (data, callback) {
+            const user = JSON.parse(data);
 
             socket.user = user;
             socket.user.IsOnline = true;
@@ -175,93 +185,48 @@ function initializeWebSocket() {
             userSocketsMap[user.Phone.Number] = socket;
 
             emitUsers();
+
+            callback();
         });
 
-        socket.on('add-user-event', function (data) {
+        socket.on("add-user-event", function (data, callback) {
             mongoOp(function (db) {
                 db.collection('users').insert(JSON.parse(data), function (err, result) {
                     if (err) {
                         io.emit('log', "error connection to users");
                         console.log(err);
+                        callback(JSON.stringify(err));
                     }
+                    callback(JSON.stringify({
+                        status: "Ok"
+                    }));
                 });
             });
         });
 
-        socket.on('user-registration-key', function (data) {
-            var payload = JSON.parse(data);
-            mongoOp(function (db) {
-                db.collection('push-registration').update({
-                    phoneNumber: payload.phoneNumber
-                }, payload, {
-                    upsert: true
-                }, function (err, result) {
-                    if (err) {
-                        io.emit('log', "error connection to users");
-                        console.log(err);
-                    }
-                });
-
-                // db.collection('push-registration').remove({ phoneNumber: payload.phoneNumber }, 1, function (err, result) {
-                //     if (!err)
-                //         db.collection('push-registration').insert(payload, function (err, result) {
-                //             if (err) {
-                //                 io.emit('log', "error connection to users");
-                //                 console.log(err);
-                //             }
-                //         });
-                // });
+        socket.on("sender-user-push", function (args, callback) {
+            pushService(args, socket.user, function (err) {
+                callback(err);
             });
         });
 
-        socket.on('sender-user-push', function (data) {
-            var targetUser = JSON.parse(data);
-
-            mongoOp(function (db) {
-                var cursor = db.collection('push-registration').find({
-                    phoneNumber: targetUser.Phone.Number
-                });
-
-                cursor.each(function (err, doc) {
-                    if (err) {
-                        console.log(err);
-                    } else if (doc != null) {
-                        var message = new gcm.Message({
-                            data: {
-                                key1: 'msg1'
-                            }
-                        });
-
-                        // Set up the sender with you API key, prepare your recipients' registration tokens.
-                        var sender = new gcm.Sender('AIzaSyAew8rDZygmnQ1aHPKgNG1UaBOqW02HAfs');
-
-                        var regTokens = [doc.key];
-
-                        sender.send(message, {
-                            registrationTokens: regTokens
-                        }, function (err, response) {
-                            if (err)
-                                console.error(err);
-                            else
-                                console.log(response);
-                        });
-                    }
-                });
-            });
-        });
-
-        socket.on('ping-me', function () {
+        socket.on("ping-me", function () {
             if (socket.user)
-                io.emit('ping-back', JSON.stringify(socket.user));
+                io.emit("ping-back", JSON.stringify(socket.user));
         });
 
-        socket.on('web-register-listener', function (ns) {
+        socket.on("web-register-listener", function (ns) {
             const num = ns.split('-')[0];
             if (num && userSocketsMap[num]) {
                 socket["tracked-room"] = ns;
                 socket.join(ns);
-                currentWebSessions[ns] = currentWebSessions[ns] ? ++currentWebSessions[ns] : 1;
-                userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns]);
+                if (currentWebSessions[ns])
+                    currentWebSessions[ns].count = ++currentWebSessions[ns].count;
+                else
+                    currentWebSessions[ns] = {
+                        count: 1
+                    };
+                userSocketsMap[num].emit("active-web-user-in-session", currentWebSessions[ns].count);
             }
         });
     });
